@@ -192,13 +192,13 @@ def handle_start_command(message):
         keyboard = types.InlineKeyboardMarkup()
         url_button = types.InlineKeyboardButton(text="—͟͞͞  ＬＩＯＮ👀", url="https://www.instagram.com/blrx__souhail?igsh=bXhwd2FuMXd2cXh4")
         keyboard.add(url_button)
-        bot.reply_to(message, "𝗪𝗘𝗟𝗖𝗢𝗠𝗘 👋 \n𝗙𝗢𝗥 𝗚𝗘𝗧 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗧𝗜𝗢𝗡 𝗔𝗕𝗢𝗨𝗧 𝗜𝗗 ℹ 𝗨𝗦𝗘 𝗧𝗛𝗜𝗦 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 ++", reply_markup=keyboard)
+        bot.reply_to(message, "𝗪𝗘𝗟𝗖𝗢𝗠𝗘 👋 \n𝗙𝗢𝗥 𝗚𝗘𝗧 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗧𝗜𝗢𝗡 𝗔𝗕𝗢𝗨𝗧 𝗜𝗗 ℹ 𝗨𝗦𝗘 𝗧𝗛𝗜𝗦 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 ++ \n بوت الشهره\n𝗦𝗛 𝗜𝗗 \n𝗘𝘅𝗮𝗺𝗽𝗹𝗲\n 𝗦𝗛 𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴", reply_markup=keyboard)
     else:
         # Send the welcome message with the link
         keyboard = types.InlineKeyboardMarkup()
         url_button = types.InlineKeyboardButton(text="—͟͞͞  ＬＩＯＮ👀", url="https://www.instagram.com/blrx__souhail?igsh=bXhwd2FuMXd2cXh4")
         keyboard.add(url_button)
-        bot.reply_to(message, "𝗪𝗘𝗟𝗖𝗢𝗠𝗘 👋 \n𝗙𝗢𝗥 𝗚𝗘𝗧 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗧𝗜𝗢𝗡 𝗔𝗕𝗢𝗨𝗧 𝗜𝗗 ℹ 𝗨𝗦𝗘 𝗧𝗛𝗜𝗦 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 ++", reply_markup=keyboard)
+        bot.reply_to(message, "𝗪𝗘𝗟𝗖𝗢𝗠𝗘 👋 \n𝗙𝗢𝗥 𝗚𝗘𝗧 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗧𝗜𝗢𝗡 𝗔𝗕𝗢𝗨𝗧 𝗜𝗗 ℹ 𝗨𝗦𝗘 𝗧𝗛𝗜𝗦 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 ++ \n بوت الشهره\n𝗦𝗛 𝗜𝗗 \n𝗘𝘅𝗮𝗺𝗽𝗹𝗲\n 𝗦𝗛 𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴", reply_markup=keyboard)
 
 # Handler for text messages in group or from developer
 @bot.message_handler(func=lambda message: message.chat.id == -1002136444842 or message.from_user.id == 6631613512, content_types=['text'])
