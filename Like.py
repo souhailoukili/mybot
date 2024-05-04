@@ -12,7 +12,7 @@ bot = telebot.TeleBot("6785020797:AAEk3qpL3fQ4vVz7ZjcNInqie9bAJ40Esfw")
 user_language = {}
 
 # ID du groupe où le bot doit répondre
-GROUP_CHAT_ID = [-1002136444842, -100206757978]
+GROUP_CHAT_ID = -1002136444842
 
 # Votre ID en tant que développeur
 DEVELOPER_ID = [1480248962, 6631613512]
@@ -201,7 +201,7 @@ def handle_start_command(message):
         bot.reply_to(message, "𝗪𝗘𝗟𝗖𝗢𝗠𝗘 👋 \n𝗙𝗢𝗥 𝗚𝗘𝗧 𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗧𝗜𝗢𝗡 𝗔𝗕𝗢𝗨𝗧 𝗜𝗗 ℹ 𝗨𝗦𝗘 𝗧𝗛𝗜𝗦 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 ++", reply_markup=keyboard)
 
 # Handler for text messages in group or from developer
-@bot.message_handler(func=lambda message: message.chat.id == [-1002136444842, -100206757978] or message.from_user.id == 6631613512, content_types=['text'])
+@bot.message_handler(func=lambda message: message.chat.id == -1002136444842 or message.from_user.id == 6631613512, content_types=['text'])
 def handle_group_and_developer_messages(message):
     if message.text.startswith('/start'):
         select_language(message.chat.id)
