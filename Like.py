@@ -6,9 +6,9 @@ from telebot import types  # Importing types module for InlineKeyboardMarkup and
 bot = telebot.TeleBot("7159692211:AAGtEl_ElBe52TI2MF4mnI_kzf5L5H6MC0U")
 
 # Define the group chat ID
-group_chat_id = -1002017761926
+group_chat_id = -1002136444842
 # Define the developer's user ID
-developer_user_id = 6927323442,   
+developer_user_id = 6631613512   
 
 def process_input(message):
     try:
