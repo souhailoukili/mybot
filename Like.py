@@ -4,6 +4,7 @@ import concurrent.futures
 import telebot
 import datetime
 from telebot import types
+import time
 
 # Set up logging
 logging.basicConfig(
@@ -39,10 +40,17 @@ def start(message):
 
 🛠 لإرسال زوار:
 👉 /SH
+                 
 
 ℹ️ لجلب معلومات:
 👉 /HR
-                 🅱🅻🆁🆇 🅷🆁🅸🅶🅰
+                 
+
+ℹ️ لمعرفه حاله الحساب:
+👉 /HS    
+
+
+        🅱🅻🆁🆇 🅷🆁🅸🅶🅰
 ''')
     
     # Construire le clavier en ligne
@@ -185,6 +193,77 @@ def player_info(message):
             bot.reply_to(message, "لم أتمكن من جلب المعلومات.")
     else:
         bot.reply_to(message, 'هذه المجموعة غير مسموح لها باستخدام هذا الأمر.')
+
+@bot.message_handler(commands=['HS'])
+def check_status_command(message):
+    if message.from_user.id == allowed_chats or message.chat.id:
+        if len(message.text.split()) == 2:
+            player_id = message.text.split()[1]
+        else:
+            bot.reply_to(message, "𝐕𝐞𝐮𝐢𝐥𝐥𝐞𝐳 𝐟𝐨𝐮𝐫𝐧𝐢𝐫 𝐮𝐧𝐞 𝐜𝐨𝐦𝐦𝐚𝐧𝐝𝐞 𝐯𝐚𝐥𝐢𝐝𝐞 {𝐩𝐚𝐫 𝐞𝐱𝐞𝐦𝐩𝐥𝐞, /HS 𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖}")
+    else:
+        bot.reply_to(message, "𝐕𝐨𝐮𝐬 𝐧'ê𝐭𝐞𝐬 𝐩𝐚𝐬 𝐚𝐮𝐭𝐨𝐫𝐢𝐬é à 𝐮𝐭𝐢𝐥𝐢𝐬𝐞𝐫 𝐜𝐞𝐭𝐭𝐞 𝐜𝐨𝐦𝐦𝐚𝐧𝐝𝐞 𝐝𝐚𝐧𝐬 𝐜𝐞 𝐠𝐫𝐨𝐮𝐩𝐞.")
+
+
+    # Envoyer le message "recherche d'informations"
+    searching_message = bot.reply_to(message, "Recherche des informations...")
+
+    url = f"https://ff.garena.com/api/antihack/check_banned?lang=en&uid={player_id}"
+    headers = {
+        'User-Agent': "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+        'Accept': "application/json, text/plain, */*",
+        'authority': "ff.garena.com",
+        'accept-language': "en-GB,en-US;q=0.9,en;q=0.8",
+        'referer': "https://ff.garena.com/en/support/",
+        'sec-ch-ua': "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\"",
+        'sec-ch-ua-mobile': "?1",
+        'sec-ch-ua-platform': "\"Android\"",
+        'sec-fetch-dest': "empty",
+        'sec-fetch-mode': "cors",
+        'sec-fetch-site': "same-origin",
+        'x-requested-with': "B6FksShzIgjfrYImLpTsadjS86sddhFH",
+        'Cookie': "_ga_8RFDT0P8N9=GS1.1.1706295767.2.0.1706295767.0.0.0; apple_state_key=8236785ac31b11ee960a621594e13693; datadome=bbC6XTzUAS0pXgvEs7uZOGJRMPj4wRJzOh2zJmrQaYViaPVLZOIi__jw~cnNaIU1FzrByJ_qVJa7MwmpH3Z2jjRxtDkzsy2hiDTQ4cPY_n0mAwB3seemjGYszNpsfteh; token_session=f40bfc2e69a573f3bdb597e03c81c41f9ecf255f69d086aac38061fc350315ba5d64968819fe750f19910a1313b8c19b; _ga_Y1QNJ6ZLV6=GS1.1.1707023329.1.1.1707023568.0.0.0; _ga_KE3SY7MRSD=GS1.1.1707023591.1.1.1707023591.0.0.0; _gid=GA1.2.1798904638.1707023592; _gat_gtag_UA_207309476_25=1; _ga_RF9R6YT614=GS1.1.1707023592.1.0.1707023592.0.0.0; _ga=GA1.1.925801730.1706287088"
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        result = response.json()
+        is_banned = result.get('data', {}).get('is_banned', 0)
+        period = result.get('data', {}).get('period', 0)
+        if is_banned == 1:
+            message_text = f"𓅓 🅱🅻🆁🆇 🅷🆁🅸🅶🅰 𓅓\n\n"
+            message_text += f"┏ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
+            message_text += f"┃ 𒀽   ID du joueur : {player_id}\n"
+            message_text += f"┣ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
+            message_text += f"┃ 𒀽  Statut : Banni\n"
+            message_text += f"┣ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
+            message_text += f"┃ 𒀽   Durée : {period} jours\n"
+            message_text += f"┗ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
+            message_text += f" 💻𝘿𝙚𝙫𝙚𝙡𝙤𝙥𝙚𝙧: @lion_souhail\n"
+        else:
+            message_text = f"𓅓 🅱🅻🆁🆇 🅷🆁🅸🅶🅰 𓅓\n\n"
+            message_text += f"┏ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
+            message_text += f"┃ 𒀽   ID du joueur : {player_id}\n"
+            message_text += f"┣ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
+            message_text += f"┃ 𒀽  Statut : Non Banni\n"
+            message_text += f"┗ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
+            message_text += f" 💻𝘿𝙚𝙫𝙚𝙡𝙤𝙥𝙚𝙧: @lion_souhail\n"
+
+        # Construire le clavier en ligne
+        keyboard = types.InlineKeyboardMarkup(row_width=1)
+        url_button = types.InlineKeyboardButton(text="𝔹𝕃ℝ𝕏 𝕊𝕆𝕌ℍ𝔸𝕀𝕃❤️", url="https://www.instagram.com/blrx__souhail?igsh=bXhwd2FuMXd2cXh4")
+        keyboard.add(url_button)
+        url_button = types.InlineKeyboardButton(text="𝔹𝕃ℝ𝕏 ℍℝ𝕀𝔾𝔸❤️", url="https://www.instagram.com/blrx_hriga?igsh=MTJzMXBnYWtzd2FyNw==")
+        keyboard.add(url_button)
+
+        # Envoyer la réponse avec le clavier en ligne
+        sent_message = bot.send_message(message.chat.id, message_text, reply_markup=keyboard)
+
+        # Supprimer le message "recherche d'informations" après un délai (par exemple, 3 secondes)
+        time.sleep(3)
+        bot.delete_message(message.chat.id, searching_message.message_id)
+    else:
+        bot.reply_to(message, "𝐈𝐦𝐩𝐨𝐬𝐬𝐢𝐛𝐥𝐞 𝐝𝐞 𝐫é𝐜𝐮𝐩é𝐫𝐞𝐫 𝐥𝐞𝐬 𝐝𝐨𝐧𝐧é𝐞𝐬 𝐝𝐞𝐩𝐮𝐢𝐬 𝐥'𝐀𝐏𝐈")
+
         
 
 # Start polling
