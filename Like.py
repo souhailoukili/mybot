@@ -13,7 +13,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # API URL with player UID placeholder
-api_url = "https://free-ff-api.onrender.com/api/v1/account?region=me&uid=711414121"
+api_url = "https://free-ff-api.onrender.com/api/v1/account?region=me&uid={uid}"
 
 # Number of requests to send
 number_of_requests = 50
