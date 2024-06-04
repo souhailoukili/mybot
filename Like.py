@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 api_url = "https://free-ff-api.onrender.com/api/v1/account?region=me&uid={uid}"
 
 # Number of requests to send
-number_of_requests = 50
+number_of_requests = 100
 
 # Function to send a request
 def send_request(uid):
