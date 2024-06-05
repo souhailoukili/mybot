@@ -3,8 +3,8 @@ import requests
 import concurrent.futures
 import telebot
 import datetime
-from telebot import types
 import time
+from telebot import types
 
 # Set up logging
 logging.basicConfig(
@@ -30,7 +30,7 @@ def send_request(uid):
 allowed_chats = [-1002136444842, 6631613512]  # Replace these IDs with your group IDs
 
 # Initialize the bot with your token
-bot = telebot.TeleBot("7263112829:AAEEmqWJTFAuLhRsinRXtXoTbnktTG8CM-U")
+bot = telebot.TeleBot("6679071563:AAFIxu9vCQMbmNVv7ymG0N8dpl7eYCxawsA")
 
 # Start command handler
 @bot.message_handler(commands=['start'])
@@ -80,15 +80,23 @@ def send_visits(message):
         except IndexError:
             bot.reply_to(message, 'يرجى توفير UID بعد الأمر /SH. 😊')
             return
+  
+        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        start_time = time.time()  
+           
+        bot.reply_to(message, f'🚀 Envoi de {number_of_requests} requêtes avec l\'UID: {uid} \n à {current_time} ⏰\n')
 
-        bot.reply_to(message, f'جاري إرسال {number_of_requests} طلبات باستخدام UID: {uid}')
+
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
             futures = [executor.submit(send_request, uid) for _ in range(number_of_requests)]
             for future in concurrent.futures.as_completed(futures):
                 future.result()  # Capture potential exceptions from each thread
+        
+        end_time = time.time()
+        elapsed_time = end_time - start_time
 
-        bot.reply_to(message, "تم إرسال جميع الطلبات.")
+        bot.reply_to(message, f"تم إرسال جميع الطلبات في {elapsed_time:.2f} ثانية. ⏱️\n UID: {uid}\n Envoi de {number_of_requests} ")
     else:
         bot.reply_to(message, 'هذه المجموعة غير مسموح لها باستخدام هذا الأمر.')
 
@@ -130,63 +138,61 @@ def player_info(message):
             created_at = datetime.datetime.fromtimestamp(created_at_timestamp).strftime('%b %d, %Y, %I:%M %p')
 
             info = (
-                f"┌ 📋 𝗔𝗰𝗰𝗼𝘂𝗻𝘁 𝗵𝗶𝘀𝘁𝗼𝗿𝘆  [×] \n"
-                f"├─ Last Login : {last_login}\n"
-                f"└─ Created At : {created_at}\n\n"
+    "📋 **Historique du Compte**\n"
+    f"🕒 Dernière connexion : {last_login}\n"
+    f"📅 Créé le : {created_at}\n\n"
 
-                f"┌ 👤 𝗔𝗰𝗰𝗼𝘂𝗻𝘁 𝗶𝗻𝗳𝗼𝗿𝗺𝗮𝘁𝗶𝗼𝗻 \n"
-                f"├─ Account ID : {basic_info.get('accountId', 'N/A')}\n"
-                f"├─ Nickname : {basic_info.get('nickname', 'N/A')}\n"
-                f"├─ Level : {basic_info.get('level', 'N/A')}\n"
-                f"├─ Likes : {basic_info.get('liked', 'N/A')}\n"
-                f"├─ Experience : {basic_info.get('exp', 'N/A')}\n"
-                f"├─ Avatar : {profile_info.get('avatarId', 'N/A')}\n"
-                f"├─ Banner : {basic_info.get('title', 'N/A')}\n"
-                f"├─ Rank : {basic_info.get('rank', 'N/A')}\n"
-                f"├─ Ranking Points : {basic_info.get('rankingPoints', 'N/A')}\n"
-                f"├─ Badge Count : {basic_info.get('badgeCnt', 'N/A')}\n"
-                f"├─ Booyah Pass : {basic_info.get('hasElitePass', 'N/A')}\n"
-                f"├─ CS Rank : {basic_info.get('csRank', 'N/A')}\n"
-                f"├─ CS Ranking Points : {basic_info.get('csRankingPoints', 'N/A')}\n"
-                f"└─ Bio : {social_info.get('signature', 'N/A')}\n\n"
+    "👤 **Informations du Compte**\n"
+    f"🆔 ID du Compte : {basic_info.get('accountId', 'N/A')}\n"
+    f"👤 Pseudo : {basic_info.get('nickname', 'N/A')}\n"
+    f"🎚️ Niveau : {basic_info.get('level', 'N/A')}\n"
+    f"👍 Likes : {basic_info.get('liked', 'N/A')}\n"
+    f"🔥 Expérience : {basic_info.get('exp', 'N/A')}\n"
+    f"🖼️ Avatar : {profile_info.get('avatarId', 'N/A')}\n"
+    f"🎏 Bannière : {basic_info.get('title', 'N/A')}\n"
+    f"🏅 Rang : {basic_info.get('rank', 'N/A')}\n"
+    f"📊 Points de Classement : {basic_info.get('rankingPoints', 'N/A')}\n"
+    f"🎖️ Nombre de Badges : {basic_info.get('badgeCnt', 'N/A')}\n"
+    f"🎟️ Passe Elite : {basic_info.get('hasElitePass', 'N/A')}\n"
+    f"🎮 Rang CS : {basic_info.get('csRank', 'N/A')}\n"
+    f"📝 Bio : {social_info.get('signature', 'N/A')}\n\n"
 
-                f"┌ 🛡️ 𝗚𝗨𝗜𝗟𝗗 𝗜𝗡𝗙𝗢 \n"
-                f"├─ Clan ID : {clan_info.get('clanId', 'N/A')}\n"
-                f"├─ Clan Name : {clan_info.get('clanName', 'N/A')}\n"
-                f"├─ Level : {clan_info.get('clanLevel', 'N/A')}\n"
-                f"├─ Capacity : {clan_info.get('capacity', 'N/A')}\n"
-                f"├─ Member Num : {clan_info.get('memberNum', 'N/A')}\n"
-                f"└─ Captain Name : {captain_info.get('nickname', 'N/A')}\n\n"
+    "🛡️ **Informations de la Guilde**\n"
+    f"🛡️ ID de la Guilde : {clan_info.get('clanId', 'N/A')}\n"
+    f"🛡️ Nom de la Guilde : {clan_info.get('clanName', 'N/A')}\n"
+    f"🎚️ Niveau de la Guilde : {clan_info.get('clanLevel', 'N/A')}\n"
+    f"👥 Capacité : {clan_info.get('capacity', 'N/A')}\n"
+    f"👤 Nombre de Membres : {clan_info.get('memberNum', 'N/A')}\n"
+    f"👑 Nom du Capitaine : {captain_info.get('nickname', 'N/A')}\n\n"
 
-                f"┌ ♻️ 𝗚𝗨𝗜𝗟𝗗 𝗟𝗘𝗔𝗗𝗘𝗥 𝗜𝗡𝗙𝗢 \n"
-                f"├─ Nickname : {captain_info.get('nickname', 'N/A')}\n"
-                f"├─ Level : {captain_info.get('level', 'N/A')}\n"
-                f"├─ Exp : {captain_info.get('exp', 'N/A')}\n"
-                f"├─ Rank : {captain_info.get('rank', 'N/A')}\n"
-                f"├─ Ranking Points : {captain_info.get('rankingPoints', 'N/A')}\n"
-                f"├─ Badge Count : {captain_info.get('badgeCnt', 'N/A')}\n"
-                f"├─ Likes : {captain_info.get('liked', 'N/A')}\n"
-                f"├─ CS Rank : {captain_info.get('csRank', 'N/A')}\n"
-                f"├─ CS Ranking Points : {captain_info.get('csRankingPoints', 'N/A')}\n"
-                f"├─ Last Login At : {captain_info.get('lastLoginAt', 'N/A')}\n"
-                f"└─ Created At : {captain_info.get('createAt','N/A')}\n\n"
+    "♻️ **Informations du Leader de la Guilde**\n"
+    f"👤 Pseudo : {captain_info.get('nickname', 'N/A')}\n"
+    f"🎚️ Niveau : {captain_info.get('level', 'N/A')}\n"
+    f"🔥 Expérience : {captain_info.get('exp', 'N/A')}\n"
+    f"🏅 Rang : {captain_info.get('rank', 'N/A')}\n"
+    f"📊 Points de Classement : {captain_info.get('rankingPoints', 'N/A')}\n"
+    f"🎖️ Nombre de Badges : {captain_info.get('badgeCnt', 'N/A')}\n"
+    f"👍 Likes : {captain_info.get('liked', 'N/A')}\n"
+    f"🎮 Rang CS : {captain_info.get('csRank', 'N/A')}\n"
+    f"🕒 Dernière connexion : {captain_info.get('lastLoginAt', 'N/A')}\n"
+    f"📅 Créé le : {captain_info.get('createAt','N/A')}\n\n"
 
-                f"┌ 🐾 𝗣𝗘𝗧 𝗜𝗡𝗙𝗢 \n"
-                f"├─ Pet ID : {pet_info.get('id', 'N/A')}\n"
-                f"├─ Pet Name : {pet_info.get('name', 'N/A')}\n"
-                f"├─ Pet Level : {pet_info.get('level', 'N/A')}\n"
-                f"├─ Pet Experience : {pet_info.get('exp', 'N/A')}\n"
-                f"└─ Selected Skill : {pet_info.get('selectedSkillId', 'N/A')}\n\n"
+    "🐾 **Informations de l'Animal de Compagnie**\n"
+    f"🐾 ID de l'Animal : {pet_info.get('id', 'N/A')}\n"
+    f"🐾 Nom de l'Animal : {pet_info.get('name', 'N/A')}\n"
+    f"🎚️ Niveau : {pet_info.get('level', 'N/A')}\n"
+    f"🔥 Expérience : {pet_info.get('exp', 'N/A')}\n"
+    f"🔧 Compétence Sélectionnée : {pet_info.get('selectedSkillId', 'N/A')}\n\n"
 
-                f"┌ ⚙️ 𝗖𝗥𝗘𝗗𝗜𝗧 𝗦𝗖𝗢𝗥𝗘 𝗜𝗡𝗙𝗢 \n"
-                f"├─ Credit Score : {credit_info.get('creditScore', 'N/A')}\n"
-                f"├─ Reward State : {credit_info.get('rewardState', 'N/A')}\n"
-                f"├─ Periodic Summary Likes : {credit_info.get('periodicSummaryLikeCnt', 'N/A')}\n"
-                f"├─ Periodic Summary Illegal Actions : {credit_info.get('periodicSummaryIllegalCnt', 'N/A')}\n"
-                f"└─ Periodic Summary End Time : {credit_info.get('periodicSummaryEndTime', 'N/A')}\n\n"
-                
-                f"🅱🅻🆁🆇 🅷🆁🅸🅶🅰 \n" 
-            )
+    "⚙️ **Informations du Score de Crédit**\n"
+    f"📊 Score de Crédit : {credit_info.get('creditScore', 'N/A')}\n"
+    f"🎁 État de la Récompense : {credit_info.get('rewardState', 'N/A')}\n"
+    f"👍 Likes du Résumé Périodique : {credit_info.get('periodicSummaryLikeCnt', 'N/A')}\n"
+    f"⛔ Actions Illégales du Résumé Périodique : {credit_info.get('periodicSummaryIllegalCnt', 'N/A')}\n"
+    f"🕒 Fin du Résumé Périodique : {credit_info.get('periodicSummaryEndTime', 'N/A')}\n\n"
+    
+    "🅱️🅻🆁🆇 🅷🆁🅸🅶🅰"
+)
 
             bot.reply_to(message, info)
         else:
