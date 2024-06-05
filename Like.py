@@ -30,7 +30,7 @@ def send_request(uid):
 allowed_chats = [-1002136444842, 6631613512]  # Replace these IDs with your group IDs
 
 # Initialize the bot with your token
-bot = telebot.TeleBot("6679071563:AAFIxu9vCQMbmNVv7ymG0N8dpl7eYCxawsA")
+bot = telebot.TeleBot("7263112829:AAEEmqWJTFAuLhRsinRXtXoTbnktTG8CM-U")
 
 # Start command handler
 @bot.message_handler(commands=['start'])
