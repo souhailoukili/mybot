@@ -1,276 +1,220 @@
-import logging
 import requests
-import concurrent.futures
 import telebot
-import datetime
-import time
-from telebot import types
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from PIL import Image, ImageDraw, ImageFont
+from io import BytesIO
 
-# Set up logging
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+# Replace with your actual Telegram bot API key
+TELEGRAM_API_KEY = '7398587700:AAFt2GhEuo44o_ILmT7D3THmecAell8vuag'
+bot = telebot.TeleBot(TELEGRAM_API_KEY)
 
-# API URL with player UID placeholder
-api_url = "https://free-ff-api.onrender.com/api/v1/account?region=me&uid={uid}"
+user_language = {}
+user_player_id = {}
 
-# Number of requests to send
-number_of_requests = 100
-
-# Function to send a request
-def send_request(uid):
-    try:
-        response = requests.get(api_url.format(uid=uid))
-        logger.info(f"Response Code: {response.status_code}, Response: {response.json()}")
-    except Exception as e:
-        logger.error(f"Error sending request: {e}")
-
-# List of allowed chat IDs
-allowed_chats = [-1002136444842, 6631613512]  # Replace these IDs with your group IDs
-
-# Initialize the bot with your token
-bot = telebot.TeleBot("7263112829:AAEEmqWJTFAuLhRsinRXtXoTbnktTG8CM-U")
-
-# Start command handler
-@bot.message_handler(commands=['start'])
-def start(message):
-    bot.reply_to(message, '''
-🌟 مرحبا بك في بوت 🌟
-
-🛠 لإرسال زوار:
-👉 /SH
-                 
-
-ℹ️ لجلب معلومات:
-👉 /HR
-                 
-
-ℹ️ لمعرفه حاله الحساب:
-👉 /HS    
-
-
-        🅱🅻🆁🆇 🅷🆁🅸🅶🅰
-''')
-    
-    # Construire le clavier en ligne
-    keyboard = types.InlineKeyboardMarkup(row_width=1)
-    url_button = types.InlineKeyboardButton(text="𝔹𝕃ℝ𝕏 𝕊𝕆𝕌ℍ𝔸𝕀𝕃❤️", url="https://www.instagram.com/blrx__souhail?igsh=bXhwd2FuMXd2cXh4")
-    keyboard.add(url_button)
-    url_button = types.InlineKeyboardButton(text="𝔹𝕃ℝ𝕏 ℍℝ𝕀𝔾𝔸❤️", url="https://www.instagram.com/blrx_hriga?igsh=MTJzMXBnYWtzd2FyNw==")
-    keyboard.add(url_button)
-            
-    message_text = "Here is the developer information:"
-
-            # Envoyer la réponse avec le clavier en ligne
-    bot.send_message(message.chat.id, message_text, reply_markup=keyboard)
-
-# Check if the chat is allowed
-def is_allowed_chat(chat_id):
-    return chat_id in allowed_chats
-
-# Send visits command handler
-@bot.message_handler(commands=['SH'])
-def send_visits(message):
-    chat_id = message.chat.id
-
-    if is_allowed_chat(chat_id):
-        try:
-            uid = message.text.split()[1]
-        except IndexError:
-            bot.reply_to(message, 'يرجى توفير UID بعد الأمر /SH. 😊')
-            return
-  
-        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        start_time = time.time()  
-           
-        bot.reply_to(message, f'🚀 Envoi de {number_of_requests} requêtes avec l\'UID: {uid} \n à {current_time} ⏰\n')
-
-
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
-            futures = [executor.submit(send_request, uid) for _ in range(number_of_requests)]
-            for future in concurrent.futures.as_completed(futures):
-                future.result()  # Capture potential exceptions from each thread
-        
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-
-        bot.reply_to(message, f"تم إرسال جميع الطلبات في {elapsed_time:.2f} ثانية. ⏱️\n UID: {uid}\n Envoi de {number_of_requests} ")
-    else:
-        bot.reply_to(message, 'هذه المجموعة غير مسموح لها باستخدام هذا الأمر.')
-
-# Function to get player info
-def get_player_info(uid):
-    response = requests.get(api_url.format(uid=uid))
+def get_player_info(player_id):
+    url = f'https://www.public.freefireinfo.site/api/info/sg/{player_id}?key=Ryz'
+    response = requests.get(url)
     if response.status_code == 200:
         return response.json()
     else:
         return None
 
-# Player info command handler
-@bot.message_handler(commands=['HR'])
-def player_info(message):
-    chat_id = message.chat.id
-
-    if is_allowed_chat(chat_id):
-        try:
-            uid = message.text.split()[1]
-        except IndexError:
-            bot.reply_to(message, 'يرجى توفير UID بعد الأمر /HR.')
-            return
-
-        data = get_player_info(uid)
-        if data:
-            basic_info = data.get('basicInfo', {})
-            captain_info = data.get('captainBasicInfo', {})
-            clan_info = data.get('clanBasicInfo', {})
-            credit_info = data.get('creditScoreInfo', {})
-            pet_info = data.get('petInfo', {})
-            profile_info = data.get('profileInfo', {})
-            social_info = data.get('socialInfo', {})
-            
-            # Convert timestamp to human-readable format
-            last_login_timestamp = int(basic_info.get('lastLoginAt', 0))
-            last_login = datetime.datetime.fromtimestamp(last_login_timestamp).strftime('%b %d, %Y, %I:%M %p')
-
-            created_at_timestamp = int(basic_info.get('createAt', 0))
-            created_at = datetime.datetime.fromtimestamp(created_at_timestamp).strftime('%b %d, %Y, %I:%M %p')
-
-            info = (
-    "📋 **Historique du Compte**\n"
-    f"🕒 Dernière connexion : {last_login}\n"
-    f"📅 Créé le : {created_at}\n\n"
-
-    "👤 **Informations du Compte**\n"
-    f"🆔 ID du Compte : {basic_info.get('accountId', 'N/A')}\n"
-    f"👤 Pseudo : {basic_info.get('nickname', 'N/A')}\n"
-    f"🎚️ Niveau : {basic_info.get('level', 'N/A')}\n"
-    f"👍 Likes : {basic_info.get('liked', 'N/A')}\n"
-    f"🔥 Expérience : {basic_info.get('exp', 'N/A')}\n"
-    f"🖼️ Avatar : {profile_info.get('avatarId', 'N/A')}\n"
-    f"🎏 Bannière : {basic_info.get('title', 'N/A')}\n"
-    f"🏅 Rang : {basic_info.get('rank', 'N/A')}\n"
-    f"📊 Points de Classement : {basic_info.get('rankingPoints', 'N/A')}\n"
-    f"🎖️ Nombre de Badges : {basic_info.get('badgeCnt', 'N/A')}\n"
-    f"🎟️ Passe Elite : {basic_info.get('hasElitePass', 'N/A')}\n"
-    f"🎮 Rang CS : {basic_info.get('csRank', 'N/A')}\n"
-    f"📝 Bio : {social_info.get('signature', 'N/A')}\n\n"
-
-    "🛡️ **Informations de la Guilde**\n"
-    f"🛡️ ID de la Guilde : {clan_info.get('clanId', 'N/A')}\n"
-    f"🛡️ Nom de la Guilde : {clan_info.get('clanName', 'N/A')}\n"
-    f"🎚️ Niveau de la Guilde : {clan_info.get('clanLevel', 'N/A')}\n"
-    f"👥 Capacité : {clan_info.get('capacity', 'N/A')}\n"
-    f"👤 Nombre de Membres : {clan_info.get('memberNum', 'N/A')}\n"
-    f"👑 Nom du Capitaine : {captain_info.get('nickname', 'N/A')}\n\n"
-
-    "♻️ **Informations du Leader de la Guilde**\n"
-    f"👤 Pseudo : {captain_info.get('nickname', 'N/A')}\n"
-    f"🎚️ Niveau : {captain_info.get('level', 'N/A')}\n"
-    f"🔥 Expérience : {captain_info.get('exp', 'N/A')}\n"
-    f"🏅 Rang : {captain_info.get('rank', 'N/A')}\n"
-    f"📊 Points de Classement : {captain_info.get('rankingPoints', 'N/A')}\n"
-    f"🎖️ Nombre de Badges : {captain_info.get('badgeCnt', 'N/A')}\n"
-    f"👍 Likes : {captain_info.get('liked', 'N/A')}\n"
-    f"🎮 Rang CS : {captain_info.get('csRank', 'N/A')}\n"
-    f"🕒 Dernière connexion : {captain_info.get('lastLoginAt', 'N/A')}\n"
-    f"📅 Créé le : {captain_info.get('createAt','N/A')}\n\n"
-
-    "🐾 **Informations de l'Animal de Compagnie**\n"
-    f"🐾 ID de l'Animal : {pet_info.get('id', 'N/A')}\n"
-    f"🐾 Nom de l'Animal : {pet_info.get('name', 'N/A')}\n"
-    f"🎚️ Niveau : {pet_info.get('level', 'N/A')}\n"
-    f"🔥 Expérience : {pet_info.get('exp', 'N/A')}\n"
-    f"🔧 Compétence Sélectionnée : {pet_info.get('selectedSkillId', 'N/A')}\n\n"
-
-    "⚙️ **Informations du Score de Crédit**\n"
-    f"📊 Score de Crédit : {credit_info.get('creditScore', 'N/A')}\n"
-    f"🎁 État de la Récompense : {credit_info.get('rewardState', 'N/A')}\n"
-    f"👍 Likes du Résumé Périodique : {credit_info.get('periodicSummaryLikeCnt', 'N/A')}\n"
-    f"⛔ Actions Illégales du Résumé Périodique : {credit_info.get('periodicSummaryIllegalCnt', 'N/A')}\n"
-    f"🕒 Fin du Résumé Périodique : {credit_info.get('periodicSummaryEndTime', 'N/A')}\n\n"
+def create_info_image(avatar_url, banner_url, player_name, player_id, player_level):
+    avatar_response = requests.get(avatar_url)
+    banner_response = requests.get(banner_url)
     
-    "🅱️🅻🆁🆇 🅷🆁🅸🅶🅰"
-)
+    avatar_image = Image.open(BytesIO(avatar_response.content)).resize((150, 150))
+    banner_image = Image.open(BytesIO(banner_response.content)).resize((450, 150))
+    
+    combined_image = Image.new('RGBA', (600, 150))
+    combined_image.paste(avatar_image, (0, 0))
+    combined_image.paste(banner_image, (150, 0))
+    
+    draw = ImageDraw.Draw(combined_image)
+    font_large = ImageFont.truetype("/mnt/data/arial.ttf", 36)
+    font_medium = ImageFont.truetype("/mnt/data/arial.ttf", 24)
+    
+    draw.text((160, 10), player_name, font=font_large, fill="white")
+    draw.text((160, 90), f"ID: {player_id}", font=font_large, fill="white")
+    draw.text((500, 110), f"Lv: {player_level}", font=font_medium, fill="white", anchor="ra")
+    
+    return combined_image
 
-            bot.reply_to(message, info)
-        else:
-            bot.reply_to(message, "لم أتمكن من جلب المعلومات.")
-    else:
-        bot.reply_to(message, 'هذه المجموعة غير مسموح لها باستخدام هذا الأمر.')
-
-@bot.message_handler(commands=['HS'])
-def check_status_command(message):
-    if message.from_user.id == allowed_chats or message.chat.id:
-        if len(message.text.split()) == 2:
-            player_id = message.text.split()[1]
-        else:
-            bot.reply_to(message, "𝐕𝐞𝐮𝐢𝐥𝐥𝐞𝐳 𝐟𝐨𝐮𝐫𝐧𝐢𝐫 𝐮𝐧𝐞 𝐜𝐨𝐦𝐦𝐚𝐧𝐝𝐞 𝐯𝐚𝐥𝐢𝐝𝐞 {𝐩𝐚𝐫 𝐞𝐱𝐞𝐦𝐩𝐥𝐞, /HS 𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖}")
-    else:
-        bot.reply_to(message, "𝐕𝐨𝐮𝐬 𝐧'ê𝐭𝐞𝐬 𝐩𝐚𝐬 𝐚𝐮𝐭𝐨𝐫𝐢𝐬é à 𝐮𝐭𝐢𝐥𝐢𝐬𝐞𝐫 𝐜𝐞𝐭𝐭𝐞 𝐜𝐨𝐦𝐦𝐚𝐧𝐝𝐞 𝐝𝐚𝐧𝐬 𝐜𝐞 𝐠𝐫𝐨𝐮𝐩𝐞.")
-
-
-    # Envoyer le message "recherche d'informations"
-    searching_message = bot.reply_to(message, "Recherche des informations...")
-
-    url = f"https://ff.garena.com/api/antihack/check_banned?lang=en&uid={player_id}"
-    headers = {
-        'User-Agent': "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
-        'Accept': "application/json, text/plain, */*",
-        'authority': "ff.garena.com",
-        'accept-language': "en-GB,en-US;q=0.9,en;q=0.8",
-        'referer': "https://ff.garena.com/en/support/",
-        'sec-ch-ua': "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\"",
-        'sec-ch-ua-mobile': "?1",
-        'sec-ch-ua-platform': "\"Android\"",
-        'sec-fetch-dest': "empty",
-        'sec-fetch-mode': "cors",
-        'sec-fetch-site': "same-origin",
-        'x-requested-with': "B6FksShzIgjfrYImLpTsadjS86sddhFH",
-        'Cookie': "_ga_8RFDT0P8N9=GS1.1.1706295767.2.0.1706295767.0.0.0; apple_state_key=8236785ac31b11ee960a621594e13693; datadome=bbC6XTzUAS0pXgvEs7uZOGJRMPj4wRJzOh2zJmrQaYViaPVLZOIi__jw~cnNaIU1FzrByJ_qVJa7MwmpH3Z2jjRxtDkzsy2hiDTQ4cPY_n0mAwB3seemjGYszNpsfteh; token_session=f40bfc2e69a573f3bdb597e03c81c41f9ecf255f69d086aac38061fc350315ba5d64968819fe750f19910a1313b8c19b; _ga_Y1QNJ6ZLV6=GS1.1.1707023329.1.1.1707023568.0.0.0; _ga_KE3SY7MRSD=GS1.1.1707023591.1.1.1707023591.0.0.0; _gid=GA1.2.1798904638.1707023592; _gat_gtag_UA_207309476_25=1; _ga_RF9R6YT614=GS1.1.1707023592.1.0.1707023592.0.0.0; _ga=GA1.1.925801730.1706287088"
+messages = {
+    'en': {
+        'enter_id': "🆔 Please enter the player ID:",
+        'choose_language': "🌐 Please choose your language:",
+        'language_set': "🇬🇧 Language set to English.",
+        'player_info': (
+            "ℹ️ Account Information:\n"
+            "- 📛 Name: {Account Name}\n"
+            "- 🆔 UID: {Account UID}\n"
+            "- 📈 Level: {Account Level}\n"
+            "- 👍 Likes: {Account Likes}\n"
+            "- 🌍 Region: {Account Region}\n"
+            "- 📝 Bio: {Account Signature}\n"
+            "- 🕰️ Last Login: {Account Last Login (GMT 0530)}\n"
+            "- 🎟️ Booyah Pass: {Account Booyah Pass}\n"
+            "- 🏅 Booyah Pass Badges: {Account Booyah Pass Badges}\n"
+            "- 📅 Create Time: {Account Create Time (GMT 0530)}\n"
+            "- 💯 Honor Score: {Account Honor Score}\n"
+            "- 🌐 Language: {Account Language}\n"
+            "🐾 Pet Info:\n"
+            "- 📈 Pet Level: {Pet Level}\n"
+            "- 🐾 Pet Name: {Pet Name}\n"
+            "- 🐶 Pet Type: {Pet Type}\n"
+            "- 🔝 Pet XP: {Pet XP}\n"
+            "🛡️ Guild Leader Info:\n"
+            "- 🏰 Guild Capacity: {Guild Capacity}\n"
+            "- 👥 Guild Current Members: {Guild Current Members}\n"
+            "- 🆔 Guild ID: {Guild ID}\n"
+            "- 📈 Guild Level: {Guild Level}\n"
+            "- 📛 Guild Name: {Guild Name}\n"
+            "- 🆔 Guild Leader ID: {Leader ID}\n"
+            "- 🎖️ Guild Leader Title: {Leader Title}\n"
+            "- 📍 Guild Leader Pin: {Leader Pin}\n"
+            "- 🔝 Guild Leader XP: {Leader XP}\n"
+        )
+    },
+    'ar': {
+        'enter_id': "🆔 يرجى إدخال معرف اللاعب:",
+        'choose_language': "🌐 يرجى اختيار لغتك:",
+        'language_set': "🇸🇦 تم تعيين اللغة إلى العربية.",
+        'player_info': (
+            "ℹ️ معلومات الحساب:\n"
+            "- 📛 الاسم: {Account Name}\n"
+            "- 🆔 UID: {Account UID}\n"
+            "- 📈 المستوى: {Account Level}\n"
+            "- 👍 الإعجابات: {Account Likes}\n"
+            "- 🌍 المنطقة: {Account Region}\n"
+            "- 📝 السيرة الذاتية: {Account Signature}\n"
+            "- 🕰️ آخر تسجيل دخول: {Account Last Login (GMT 0530)}\n"
+            "- 🎟️ Booyah Pass: {Account Booyah Pass}\n"
+            "- 🏅 شارات Booyah Pass: {Account Booyah Pass Badges}\n"
+            "- 📅 وقت الإنشاء: {Account Create Time (GMT 0530)}\n"
+            "- 💯 درجة الشرف: {Account Honor Score}\n"
+            "- 🌐 اللغة: {Account Language}\n"
+            "🐾 معلومات الحيوان الأليف:\n"
+            "- 📈 مستوى الحيوان الأليف: {Pet Level}\n"
+            "- 🐾 اسم الحيوان الأليف: {Pet Name}\n"
+            "- 🐶 نوع الحيوان الأليف: {Pet Type}\n"
+            "- 🔝 XP الحيوان الأليف: {Pet XP}\n"
+            "🛡️ معلومات قائد النقابة:\n"
+            "- 🏰 سعة النقابة: {Guild Capacity}\n"
+            "- 👥 الأعضاء الحاليين للنقابة: {Guild Current Members}\n"
+            "- 🆔 معرف النقابة: {Guild ID}\n"
+            "- 📈 مستوى النقابة: {Guild Level}\n"
+            "- 📛 اسم النقابة: {Guild Name}\n"
+            "- 🆔 معرف قائد النقابة: {Leader ID}\n"
+            "- 🎖️ لقب قائد النقابة: {Leader Title}\n"
+            "- 📍 رمز قائد النقابة: {Leader Pin}\n"
+            "- 🔝 XP قائد النقابة: {Leader XP}\n"
+        )
+    },
+    'fr': {
+        'enter_id': "🆔 Veuillez entrer l'ID du joueur:",
+        'choose_language': "🌐 Veuillez choisir votre langue:",
+        'language_set': "🇫🇷 La langue a été définie sur le français.",
+        'player_info': (
+            "ℹ️ Informations sur le compte:\n"
+            "- 📛 Nom: {Account Name}\n"
+            "- 🆔 UID: {Account UID}\n"
+            "- 📈 Niveau: {Account Level}\n"
+            "- 👍 J'aime: {Account Likes}\n"
+            "- 🌍 Région: {Account Region}\n"
+            "- 📝 Bio: {Account Signature}\n"
+            "- 🕰️ Dernière connexion: {Account Last Login (GMT 0530)}\n"
+            "- 🎟️ Booyah Pass: {Account Booyah Pass}\n"
+            "- 🏅 Badges Booyah Pass: {Account Booyah Pass Badges}\n"
+            "- 📅 Temps de création: {Account Create Time (GMT 0530)}\n"
+            "- 💯 Score d'honneur: {Account Honor Score}\n"
+            "- 🌐 Langue: {Account Language}\n"
+            "🐾 Informations sur l'animal de compagnie:\n"
+            "- 📈 Niveau de l'animal: {Pet Level}\n"
+            "- 🐾 Nom de l'animal: {Pet Name}\n"
+            "- 🐶 Type d'animal: {Pet Type}\n"
+            "- 🔝 XP de l'animal: {Pet XP}\n"
+            "🛡️ Informations sur le chef de guilde:\n"
+            "- 🏰 Capacité de la guilde: {Guild Capacity}\n"
+            "- 👥 Membres actuels de la guilde: {Guild Current Members}\n"
+            "- 🆔 ID de la guilde: {Guild ID}\n"
+            "- 📈 Niveau de la guilde: {Guild Level}\n"
+            "- 📛 Nom de la guilde: {Guild Name}\n"
+            "- 🆔 ID du chef de guilde: {Leader ID}\n"
+            "- 🎖️ Titre du chef de guilde: {Leader Title}\n"
+            "- 📍 Épinglette du chef de guilde: {Leader Pin}\n"
+            "- 🔝 XP du chef de guilde: {Leader XP}\n"
+        )
     }
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        result = response.json()
-        is_banned = result.get('data', {}).get('is_banned', 0)
-        period = result.get('data', {}).get('period', 0)
-        if is_banned == 1:
-            message_text = f"𓅓 🅱🅻🆁🆇 🅷🆁🅸🅶🅰 𓅓\n\n"
-            message_text += f"┏ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
-            message_text += f"┃ 𒀽   ID du joueur : {player_id}\n"
-            message_text += f"┣ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
-            message_text += f"┃ 𒀽  Statut : Banni\n"
-            message_text += f"┣ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
-            message_text += f"┃ 𒀽   Durée : {period} jours\n"
-            message_text += f"┗ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
-            message_text += f" 💻𝘿𝙚𝙫𝙚𝙡𝙤𝙥𝙚𝙧: @lion_souhail\n"
-        else:
-            message_text = f"𓅓 🅱🅻🆁🆇 🅷🆁🅸🅶🅰 𓅓\n\n"
-            message_text += f"┏ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
-            message_text += f"┃ 𒀽   ID du joueur : {player_id}\n"
-            message_text += f"┣ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
-            message_text += f"┃ 𒀽  Statut : Non Banni\n"
-            message_text += f"┗ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━ ━\n"
-            message_text += f" 💻𝘿𝙚𝙫𝙚𝙡𝙤𝙥𝙚𝙧: @lion_souhail\n"
+}
 
-        # Construire le clavier en ligne
-        keyboard = types.InlineKeyboardMarkup(row_width=1)
-        url_button = types.InlineKeyboardButton(text="𝔹𝕃ℝ𝕏 𝕊𝕆𝕌ℍ𝔸𝕀𝕃❤️", url="https://www.instagram.com/blrx__souhail?igsh=bXhwd2FuMXd2cXh4")
-        keyboard.add(url_button)
-        url_button = types.InlineKeyboardButton(text="𝔹𝕃ℝ𝕏 ℍℝ𝕀𝔾𝔸❤️", url="https://www.instagram.com/blrx_hriga?igsh=MTJzMXBnYWtzd2FyNw==")
-        keyboard.add(url_button)
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.reply_to(message, "👋 Welcome! To get player information, type /get [player ID].")
 
-        # Envoyer la réponse avec le clavier en ligne
-        sent_message = bot.send_message(message.chat.id, message_text, reply_markup=keyboard)
-
-        # Supprimer le message "recherche d'informations" après un délai (par exemple, 3 secondes)
-        time.sleep(3)
-        bot.delete_message(message.chat.id, searching_message.message_id)
-    else:
-        bot.reply_to(message, "𝐈𝐦𝐩𝐨𝐬𝐬𝐢𝐛𝐥𝐞 𝐝𝐞 𝐫é𝐜𝐮𝐩é𝐫𝐞𝐫 𝐥𝐞𝐬 𝐝𝐨𝐧𝐧é𝐞𝐬 𝐝𝐞𝐩𝐮𝐢𝐬 𝐥'𝐀𝐏𝐈")
-
+@bot.message_handler(commands=['get'])
+def get_player(message):
+    try:
+        player_id = message.text.split()[1]
+        user_player_id[message.chat.id] = player_id
+        markup = InlineKeyboardMarkup(row_width=2)
+        markup.add(
+            InlineKeyboardButton("English 🇬🇧", callback_data="language_en"),
+            InlineKeyboardButton("العربية 🇸🇦", callback_data="language_ar"),
+            InlineKeyboardButton("Français 🇫🇷", callback_data="language_fr")
+        )
         
+        bot.reply_to(message, messages['en']['choose_language'], reply_markup=markup)
+    except IndexError:
+        bot.reply_to(message, "⚠️ Please provide a valid player ID. Example: /get 123456789")
 
-# Start polling
+@bot.callback_query_handler(func=lambda call: call.data.startswith("language_"))
+def callback_language(call):
+    lang = call.data.split("_")[1]
+    user_language[call.message.chat.id] = lang
+
+    bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
+
+    if lang == 'en':
+        bot.send_message(call.message.chat.id, messages['en']['language_set'])
+    elif lang == 'ar':
+        bot.send_message(call.message.chat.id, messages['ar']['language_set'])
+    elif lang == 'fr':
+        bot.send_message(call.message.chat.id, messages['fr']['language_set'])
+
+    player_id = user_player_id[call.message.chat.id]
+    
+    # Send a loading message with the search emoji
+    loading_message = bot.send_message(call.message.chat.id, "🤖")
+
+    player_info = get_player_info(player_id)
+    
+    if player_info:
+        player_name = player_info.get('Account Name', 'N/A')
+        player_level = player_info.get('Account Level', 'N/A')
+        avatar_url = player_info.get('Account Avatar Image')
+        banner_url = player_info.get('Account Banner Image')
+        
+        info_image = create_info_image(avatar_url, banner_url, player_name, player_id, player_level)
+        
+        info_bio = BytesIO()
+        info_image.save(info_bio, format='PNG')
+        info_bio.seek(0)
+        
+        # Sending the image as a photo to ensure it's non-empty
+        bot.send_photo(call.message.chat.id, photo=info_bio)
+        
+        lang_messages = messages[lang]
+        reply = lang_messages['player_info'].format(
+            **player_info,
+            **player_info.get('Equipped Pet Information', {}),
+            **player_info.get('Guild Information', {}),
+            **player_info.get('Guild Leader Information', {})
+        )
+    else:
+        reply = "❌ Failed to retrieve data."
+
+    # Edit the loading message with the actual information
+    bot.edit_message_text(reply, call.message.chat.id, loading_message.message_id)
+
 bot.polling()
