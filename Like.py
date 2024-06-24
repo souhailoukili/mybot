@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
 # Replace with your actual Telegram bot API key
-TELEGRAM_API_KEY = '7398587700:AAFt2GhEuo44o_ILmT7D3THmecAell8vuag'
+TELEGRAM_API_KEY = '7263112829:AAEEmqWJTFAuLhRsinRXtXoTbnktTG8CM-U'
 bot = telebot.TeleBot(TELEGRAM_API_KEY)
 
 user_language = {}
